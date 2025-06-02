@@ -15,6 +15,8 @@ Chronos is well suited for any CRISPR KO experiment where:
 - You expect most cells to be proliferating.
 - You expect the majority of gene knockouts to have little to no effect on proliferation.
 - You might or might not have copy number data for your cell lines.
+- You might be using CRISPRko or CRISPRi. Chronos was developed for CRISPRko, but should work for CRISPRi experiments. 
+- You might want to compare the effects of gene knockouts between screens in two different conditions, for example, treated and untreated. However, please note that to estimate the significance of the difference in effects, Chronos requires two independent biological replicates per condition (ideally infected separately)
 
 Chronos may not work well for:
 - RNAi experiments. Chronos makes biological assumptions that are fundamentally incompatible with RNAi. Try DEMETER 2.
