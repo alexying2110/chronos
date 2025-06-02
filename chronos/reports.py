@@ -45,8 +45,8 @@ def load_chronos_data_for_qc(directory, gene_effect_file="gene_effect.hdf5"):
 		'library_effect': pd.read_csv(os.path.join(directory, "library_effect.csv"), index_col=0),
 		't0_offset': pd.read_csv(os.path.join(directory, "t0_offset.csv"), index_col=0),
 		'guide_efficacy': pd.read_csv(os.path.join(directory, "guide_efficacy.csv"), index_col=0)["efficacy"],
-		'cell_line_efficacy': pd.read_csv(os.path.join(directory, "cell_line_efficacy.csv"), index_col=0),
-		'growth_rate': pd.read_csv(os.path.join(directory, "cell_line_growth_rate.csv"), index_col=0),
+		'replicate_efficacy': pd.read_csv(os.path.join(directory, "replicate_efficacy.csv"), index_col=0),
+		'growth_rate': pd.read_csv(os.path.join(directory, "growth_rate.csv"), index_col=0),
 		'readcounts': {
 			library: read_hdf5(os.path.join(directory, "%s_readcounts.hdf5" % library))
 			for library in libraries
@@ -430,7 +430,7 @@ You passed '%s', %r" % (data, gene_effect_file))
 	required_data_keys = ["gene_effect", "sequence_map", "guide_map", "guide_efficacy",
 						  "predicted_readcounts", "readcounts",
 						 "logfoldchange", 'predicted_logfoldchange', 
-						 "excess_variance", "growth_rate", "cell_line_efficacy",
+						 "excess_variance", "growth_rate", "replicate_efficacy",
 						 "t0_offset", "library_effect"
 						 ] 
 	for key in required_data_keys:
@@ -518,12 +518,8 @@ The FDRs should be considered optimistic."
 "Higher overall gene SD is better (if control separation in each cell line is maintained). There is usually a trend \
 towards more variance in more negative genes. There should NOT be a trend in the second plot."
 ))
-	fig, axes = plt.subplots(1, 2, figsize=(plot_width, plot_height))
-	plt.sca(axes[0])
+	fig, axes = plt.subplots(1, 1, figsize=(plot_width, plot_height))
 	mean_vs_sd_scatter(data["gene_effect"], metrics=metrics)
-	plt.sca(axes[1])
-	mean_vs_cell_eff_correlation(data['gene_effect'], data['cell_line_efficacy'].mean(axis=1))
-	add_image("gene_effect_properties.png")
 
 	if not copy_number is None:
 		print("plotting copy number effect")
@@ -547,20 +543,28 @@ towards more variance in more negative genes. There should NOT be a trend in the
 Often there will be a trend towards lower growth estimates with lower cell efficacy estimates. \
 Guide efficacies have a single global value, but here have been grouped by presence in a library. \
 They should have a high peak near 1."))
+
 	growth_rate = []
-	cell_line_efficacy = []
+	replicate_efficacy = []
+
 	for library in library_data:
-		gr, cle = data["growth_rate"][library].dropna().align(data['cell_line_efficacy'][library].dropna(), join="inner")
+
+		gr, cle = data["growth_rate"].query("library == %r" % library)["growth_rate"].dropna().align(
+			data['replicate_efficacy'].query("library == %r" % library)["replicate_efficacy"].dropna(), 
+			join="inner"
+		)
+
 		growth_rate.append(gr)
-		cell_line_efficacy.append(cle)
-	growth_rate, cell_line_efficacy = pd.concat(growth_rate), pd.concat(cell_line_efficacy)
+		replicate_efficacy.append(cle)
+
+	growth_rate, replicate_efficacy = pd.concat(growth_rate), pd.concat(replicate_efficacy)
 	fig, axes = plt.subplots(1, 2, figsize=(plot_width, plot_height))
 	plt.sca(axes[0])
-	density_scatter(growth_rate, cell_line_efficacy, trend_line=False, label_outliers=4, outliers_from="xy_zscore")
+	density_scatter(growth_rate, replicate_efficacy, trend_line=False, outliers_from="xy_zscore")
 	plt.xlabel("Relative Growth Rate")
-	plt.ylabel("Cell Line Efficacy")
+	plt.ylabel("Replicate Screening Efficacy")
 	metrics["growth_rate_sd"] = growth_rate.std()
-	metrics["cell_efficacy_mean"] = cell_line_efficacy.mean()
+	metrics["cell_efficacy_mean"] = replicate_efficacy.mean()
 	plt.sca(axes[1])
 	for library, guide_map in data['guide_map'].items():
 		guides = guide_map.sgrna.unique()

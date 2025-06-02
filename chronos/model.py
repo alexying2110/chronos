@@ -498,7 +498,7 @@ def load_saved_model(directory, readcounts=None, guide_gene_map=None, sequence_m
 		raise ValueError("if any of `readcounts`, `guide_gene_map`, or `sequence_map` are provided, \
 all of them must be provided")
 	required_files = [
-		"cell_line_efficacy.csv", "cell_line_growth_rate.csv", "gene_effect.hdf5", "guide_efficacy.csv",
+		"replicate_efficacy.csv", "growth_rate.csv", "gene_effect.hdf5", "guide_efficacy.csv",
 		"library_effect.csv", "parameters.json", "screen_delay.csv", "screen_excess_variance.csv",
 		 "t0_offset.csv"
 	]
@@ -783,7 +783,7 @@ class Chronos(object):
 			guide_efficacy_reg (`float`): regularization of guide efficacy towards 1.
 			library_batch_reg (`float`): regularization of gene means within libraries towards the global gene mean.
 			smart_init (`bool`): if True (default) the model initializes cell efficacy and gene effect by using estimates
-				based on the fold change of the latest available time points. If this parameter is False, cell_line_efficacy
+				based on the fold change of the latest available time points. If this parameter is False, replicate_efficacy
 				will be 1 for all cell lines!
 			pretrained (`bool`): whether the model will use paramters from a pretrained state using other data.
 				If true, once initialized, parameters must be loaded from a saved model directory with `import_model`
@@ -2519,9 +2519,9 @@ your data" % missing
 		Always writes:
 			'gene_effect.hdf5': the matrix of inferred gene effects
 			'guide_efficacy.csv': the estimated efficacy of gene KO of each sgRNA
-			'cell_line_efficacy.csv': the estimated efficacy of gene KO in each cell line in each library, with one column per 
+			'replicate_efficacy.csv': the estimated efficacy of gene KO in each cell line in each library, with one column per 
 				library
-			'cell_line_growth_rate.csv': the estimated relative growth of each cell line, formatted like cell_line_efficacy.csv.
+			'growth_rate.csv': the estimated relative growth of each cell line, formatted like replicate_efficacy.csv.
 			'screen_excess_variance.csv': the per-screen, per-library estimated overdispersion parameter of the NB2 model,
 				same format.
 			'screen_delay.csv': The onset time for the viability effect from gene KO, untrained by default.

@@ -595,7 +595,7 @@ def mean_vs_sd_scatter(gene_effect,
 		metrics.update(out)
 
 
-def mean_vs_cell_eff_correlation(gene_effect, cell_efficacy,
+def mean_vs_cell_eff_correlation(gene_effect, replicate_efficacy,
 		ax=None, metrics=None, legend=True, legend_args={"loc": "upper right"},
 		density_scatter_args={"alpha": .6, "s": 10, "label_outliers": 5, "outliers_from": "y"}
 	):
@@ -606,6 +606,7 @@ def mean_vs_cell_eff_correlation(gene_effect, cell_efficacy,
 	be negatively correlated with cell efficacy. Returns cell efficacy correlation mean, standard deviation,
 	and it correlation with gene mean.
 	'''
+	raise NotImplementedError("Function needs to be updated before using")
 	means = gene_effect.mean()
 	corrs = gene_effect.corrwith(cell_efficacy)
 	if not ax:
